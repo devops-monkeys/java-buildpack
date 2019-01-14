@@ -16,4 +16,4 @@
 # Configuration for the Jetty ALPN Java agent
 ---
 version: 2.+
-repository_root: "https://raw.githubusercontent.com/booiiing/jetty-alpn-cf-java-buildpack-repository/master/"
+repository_root: "https://raw.githubusercontent.com/devops-monkeys/jetty-alpn-cf-java-buildpack-repository/master/"
