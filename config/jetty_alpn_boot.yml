@@ -15,5 +15,5 @@
 
 # Configuration for the Jetty ALPN boot jar
 ---
-version: 8.1.13.v20181017
+version: 8.1.13
 repository_root: "https://raw.githubusercontent.com/devops-monkeys/jetty-alpn-cf-java-buildpack-repository/alpn-boot/"
