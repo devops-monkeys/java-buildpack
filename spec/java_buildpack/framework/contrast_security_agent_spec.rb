@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2016 the original author or authors.
+# Copyright 2013-2020 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,9 +33,9 @@ describe JavaBuildpack::Framework::ContrastSecurityAgent do
       allow(services).to receive(:one_service?).with(/contrast-security/, 'api_key', 'service_key', 'teamserver_url',
                                                      'username').and_return(true)
       allow(services).to receive(:find_service).and_return('credentials' => { 'teamserver_url' => 'a_url',
-                                                                              'username'       => 'contrast_user',
-                                                                              'api_key'        => 'api_test',
-                                                                              'service_key'    => 'service_test' })
+                                                                              'username' => 'contrast_user',
+                                                                              'api_key' => 'api_test',
+                                                                              'service_key' => 'service_test' })
     end
 
     it 'detects with contrastsecurity service' do

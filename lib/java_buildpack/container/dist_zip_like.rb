@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2018 the original author or authors.
+# Copyright 2013-2020 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,7 +47,8 @@ module JavaBuildpack
           @droplet.environment_variables.as_env_vars,
           @droplet.java_home.as_env_var,
           'exec',
-          qualify_path(start_script(root), @droplet.root)
+          qualify_path(start_script(root), @droplet.root),
+          arguments
         ].flatten.compact.join(' ')
       end
 
@@ -76,15 +77,21 @@ module JavaBuildpack
 
       private
 
-      PATTERN_APP_CLASSPATH = /^declare -r app_classpath=\"(.*)\"$/
+      ARGUMENTS_PROPERTY = 'arguments'
 
-      PATTERN_CLASSPATH = /^CLASSPATH=(.*)$/
+      PATTERN_APP_CLASSPATH = /^declare -r app_classpath=\"(.*)\"$/.freeze
 
-      private_constant :PATTERN_APP_CLASSPATH, :PATTERN_CLASSPATH
+      PATTERN_CLASSPATH = /^CLASSPATH=(.*)$/.freeze
+
+      private_constant :ARGUMENTS_PROPERTY, :PATTERN_APP_CLASSPATH, :PATTERN_CLASSPATH
+
+      def arguments
+        @configuration[ARGUMENTS_PROPERTY]
+      end
 
       def augment_app_classpath(content)
-        additional_classpath = @droplet.additional_libraries.sort.map do |additional_library|
-          "$app_home/#{additional_library.relative_path_from(start_script(root).dirname)}"
+        additional_classpath = (@droplet.additional_libraries + @droplet.root_libraries).sort.map do |library|
+          "$app_home/#{library.relative_path_from(start_script(root).dirname)}"
         end
 
         update_file start_script(root), content,
@@ -92,8 +99,8 @@ module JavaBuildpack
       end
 
       def augment_classpath(content)
-        additional_classpath = @droplet.additional_libraries.sort.map do |additional_library|
-          "$APP_HOME/#{additional_library.relative_path_from(root)}"
+        additional_classpath = (@droplet.additional_libraries + @droplet.root_libraries).sort.map do |library|
+          "$APP_HOME/#{library.relative_path_from(root)}"
         end
 
         update_file start_script(root), content,
