@@ -22,18 +22,19 @@ For general information on configuring the buildpack, including how to specify c
 
 The JRE can be configured by modifying the [`config/sap_machine_jre.yml`][] file in the buildpack fork.  The JRE uses the [`Repository` utility support][repositories] and so it supports the [version syntax][]  defined there.
 
-To use SapMachine JRE instead of OpenJDK without forking java-buildpack, set environment variable:
+To use SapMachine JRE instead of OpenJDK without forking java-buildpack, set environment variable and restage:
 
-`cf set-env <app_name> JBP_CONFIG_COMPONENTS '{jres: ["JavaBuildpack::Jre::SapMachineJRE"]}'`
-
-`cf restage <app_name>`
+```bash
+cf set-env <app_name> JBP_CONFIG_COMPONENTS '{jres: ["JavaBuildpack::Jre::SapMachineJRE"]}'
+cf restage <app_name>
+```
 
 | Name | Description
 | ---- | -----------
 | `jre.repository_root` | The URL of the SapMachine repository index ([details][repositories]).
-| `jre.version` | The version of Java runtime to use.  Candidate versions can be found in the listings for [mountainlion][] and [trusty][]. Note: version 1.8.0 and higher require the `memory_sizes` and `memory_heuristics` mappings to specify `metaspace` rather than `permgen`.
+| `jre.version` | The version of Java runtime to use.  Candidate versions can be found in the listings for [bionic][]. Note: version 1.8.0 and higher require the `memory_sizes` and `memory_heuristics` mappings to specify `metaspace` rather than `permgen`.
 | `jvmkill.repository_root` | The URL of the `jvmkill` repository index ([details][repositories]).
-| `jvmkill.version` | The version of `jvmkill` to use.  Candidate versions can be found in the listings for [mountainlion][jvmkill-mountainlion] and [trusty][jvmkill-trusty].
+| `jvmkill.version` | The version of `jvmkill` to use.  Candidate versions can be found in the listings for [bionic][jvmkill-bionic].
 | `memory_calculator` | Memory calculator defaults, described below under "Memory".
 
 ### Additional Resources
@@ -107,16 +108,19 @@ class_count: 500
 
 A percentage of the total memory allocated to the container to be left as headroom and excluded from the memory calculation.
 
+```yaml
+headroom: 10
+```
+
 #### Stack Threads
 
-The amount of memory that should be allocated to stacks is given as an amount of memory per
-thread with the Java option `-Xss`. If an explicit number of
-threads should be used for the calculation of stack memory, then it should be specified as in
-the following example:
+The amount of memory that should be allocated to stacks is given as an amount of memory per thread with the Java option `-Xss`. If an explicit number of threads should be used for the calculation of stack memory, then it should be specified as in the following example:
 
 ```yaml
 stack_threads: 500
 ```
+
+Note that the default value of 250 threads is optimized for a default Tomcat configuration.  If you are using another container, especially something non-blocking like Netty, it's more appropriate to use a significantly smaller value.  Typically 25 threads would cover the needs of both the server (Netty) and the threads started by the JVM itself.
 
 #### Java Options
 
@@ -151,14 +155,12 @@ JVM Memory Configuration: -XX:MaxDirectMemorySize=10M -XX:MaxMetaspaceSize=99199
 ```
 
 [`config/sap_machine_jre.yml`]: ../config/sap_machine_jre.yml
+[bionic]: https://java-buildpack.cloudfoundry.org/openjdk/bionic/x86_64/index.yml
 [Configuration and Extension]: ../README.md#configuration-and-extension
 [Java Buildpack Memory Calculator]: https://github.com/cloudfoundry/java-buildpack-memory-calculator
-[jvmkill-mountainlion]: http://download.pivotal.io.s3.amazonaws.com/jvmkill/mountainlion/x86_64/index.yml
-[jvmkill-trusty]: http://download.pivotal.io.s3.amazonaws.com/jvmkill/trusty/x86_64/index.yml
+[jvmkill-bionic]: https://java-buildpack.cloudfoundry.org/jvmkill/bionic/x86_64/index.yml
 [Memory Calculator's README]: https://github.com/cloudfoundry/java-buildpack-memory-calculator
-[mountainlion]: http://download.pivotal.io.s3.amazonaws.com/openjdk/mountainlion/x86_64/index.yml
-[SapMachine]: https://sapmachine.io
 [repositories]: extending-repositories.md
-[trusty]: http://download.pivotal.io.s3.amazonaws.com/openjdk/trusty/x86_64/index.yml
+[SapMachine]: https://sapmachine.io
 [version syntax]: extending-repositories.md#version-syntax-and-ordering
 [Volume Service]: https://docs.cloudfoundry.org/devguide/services/using-vol-services.html

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Cloud Foundry Java Buildpack
-# Copyright 2017 the original author or authors.
+# Copyright 2013-2020 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ describe JavaBuildpack::Jre::IbmJRE do
   let(:java_home) { JavaBuildpack::Component::MutableJavaHome.new }
 
   let(:configuration) do
-    { 'jre'           => jre_configuration,
+    { 'jre' => jre_configuration,
       'jvmkill_agent' => jvmkill_agent_configuration }
   end
 
@@ -66,7 +66,7 @@ class StubIbmJRE < JavaBuildpack::Jre::IbmJRE
 end
 
 def sub_configuration_context(configuration)
-  cntxt                 = context.clone
+  cntxt = context.clone
   cntxt[:configuration] = configuration
   cntxt
 end
