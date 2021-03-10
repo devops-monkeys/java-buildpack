@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2018 the original author or authors.
+# Copyright 2013-2020 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -59,11 +59,11 @@ module JavaBuildpack
 
       private
 
-      FILTER = /session-replication/
+      FILTER = /session-replication/.freeze
       KEY_LOCATORS = 'locators'
       KEY_USERS = 'users'
 
-      SESSION_MANAGER_CLASS_NAME = 'org.apache.geode.modules.session.catalina.Tomcat8DeltaSessionManager'
+      SESSION_MANAGER_CLASS_NAME = 'org.apache.geode.modules.session.catalina.Tomcat9DeltaSessionManager'
       REGION_ATTRIBUTES_ID = 'PARTITION_REDUNDANT_HEAP_LRU'
       CACHE_CLIENT_LISTENER_CLASS_NAME =
         'org.apache.geode.modules.session.catalina.ClientServerCacheLifecycleListener'
@@ -71,16 +71,10 @@ module JavaBuildpack
       SCHEMA_INSTANCE_URL = 'http://www.w3.org/2001/XMLSchema-instance'
       SCHEMA_LOCATION = 'http://geode.apache.org/schema/cache http://geode.apache.org/schema/cache/cache-1.0.xsd'
       LOCATOR_REGEXP = Regexp.new('([^\\[]+)\\[([^\\]]+)\\]').freeze
-      FUNCTION_SERVICE_CLASS_NAMES = [
-        'org.apache.geode.modules.util.CreateRegionFunction',
-        'org.apache.geode.modules.util.TouchPartitionedRegionEntriesFunction',
-        'org.apache.geode.modules.util.TouchReplicatedRegionEntriesFunction',
-        'org.apache.geode.modules.util.RegionSizeFunction'
-      ].freeze
 
       private_constant :FILTER, :KEY_LOCATORS, :KEY_USERS, :SESSION_MANAGER_CLASS_NAME, :REGION_ATTRIBUTES_ID,
                        :CACHE_CLIENT_LISTENER_CLASS_NAME, :SCHEMA_URL, :SCHEMA_INSTANCE_URL, :SCHEMA_LOCATION,
-                       :LOCATOR_REGEXP, :FUNCTION_SERVICE_CLASS_NAMES
+                       :LOCATOR_REGEXP
 
       def cluster_operator?(user)
         user['username'] == 'cluster_operator' || user['roles'] && (user['roles'].include? 'cluster_operator')
@@ -94,20 +88,6 @@ module JavaBuildpack
                                             'version' => '1.0'
 
         add_pool client_cache
-        add_function_service client_cache
-      end
-
-      def add_functions(function_service)
-        FUNCTION_SERVICE_CLASS_NAMES.each do |function_class_name|
-          function = function_service.add_element 'function'
-          class_name = function.add_element 'class-name'
-          class_name.add_text(function_class_name)
-        end
-      end
-
-      def add_function_service(client_cache)
-        function_service = client_cache.add_element 'function-service'
-        add_functions function_service
       end
 
       def add_listener(server)
@@ -157,7 +137,7 @@ module JavaBuildpack
         puts '       Adding Geode-based Session Replication'
 
         document = read_xml context_xml
-        context  = REXML::XPath.match(document, '/Context').first
+        context = REXML::XPath.match(document, '/Context').first
 
         add_manager context
 
@@ -167,7 +147,7 @@ module JavaBuildpack
       def mutate_server
         document = read_xml server_xml
 
-        server   = REXML::XPath.match(document, '/Server').first
+        server = REXML::XPath.match(document, '/Server').first
 
         add_listener server
 
