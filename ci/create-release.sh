@@ -1,6 +1,6 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-set -e -u
+set -euo pipefail
 
 RELEASE=$1
 
@@ -17,5 +17,5 @@ bundle exec rake versions:markdown versions:json
 
 git add .
 git commit --message "v$RELEASE Release"
-git tag -s v$RELEASE -m "v$RELEASE"
+git tag "v$RELEASE"
 git reset --hard HEAD^1

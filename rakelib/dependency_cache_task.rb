@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2018 the original author or authors.
+# Copyright 2013-2020 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,11 +48,11 @@ module Package
 
     private
 
-    ARCHITECTURE_PATTERN = /\{architecture\}/
+    ARCHITECTURE_PATTERN = /\{architecture\}/.freeze
 
-    DEFAULT_REPOSITORY_ROOT_PATTERN = /\{default.repository.root\}/
+    DEFAULT_REPOSITORY_ROOT_PATTERN = /\{default.repository.root\}/.freeze
 
-    PLATFORM_PATTERN = /\{platform\}/
+    PLATFORM_PATTERN = /\{platform\}/.freeze
 
     private_constant :ARCHITECTURE_PATTERN, :DEFAULT_REPOSITORY_ROOT_PATTERN, :PLATFORM_PATTERN
 
@@ -109,7 +109,13 @@ module Package
     end
 
     def component_ids
-      configuration('components').values.flatten.map { |component| component.split('::').last.snake_case }
+      conf = configuration('components').values.flatten.map { |component| component.split('::').last.snake_case }
+      offline_cache = ENV['ADD_TO_CACHE']
+      unless offline_cache.nil?
+        offline_cache = offline_cache.split(',')
+        (conf << offline_cache).flatten!.uniq!
+      end
+      conf
     end
 
     def configuration(id)
@@ -126,6 +132,13 @@ module Package
         if component_id == 'open_jdk_jre' && sub_component_id == 'jre'
           c1 = configuration.clone
           c1['version'] = '11.+'
+
+          configurations << c1
+        end
+
+        if component_id == 'open_jdk_jre' && sub_component_id == 'jre'
+          c1 = configuration.clone
+          c1['version'] = '16.+'
 
           configurations << c1
         end
